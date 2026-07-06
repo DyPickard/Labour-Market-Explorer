@@ -4,6 +4,8 @@ import zipfile
 import requests
 import pandas as pd
 
+from database_loader import load_data_to_sqlite
+
 # 1. Configuration
 # PRODUCT_ID for current active table for Labour Force Characteristics by Economic Region
 PRODUCT_ID = "14100462"
@@ -70,3 +72,4 @@ def run_etl():
 
 if __name__ == "__main__":
     okanagan_data = run_etl()
+    load_data_to_sqlite(okanagan_data)
