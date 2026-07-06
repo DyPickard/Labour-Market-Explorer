@@ -35,6 +35,8 @@ fig = px.line(
     title=f"{selected_metric} Over Time ({TARGET_GEO})"
 )
 
+st.plotly_chart(fig, use_container_width=True)
+
 # Display data preview table
 st.subheader("Raw filtered pipeline data")
 st.dataframe(dframe_filtered, use_container_width=True)
