@@ -3,6 +3,7 @@
 A Statistics Canada Labour Force Survey dashboard. A Python ETL pipeline stages
 StatCan data into SQLite; a Flask server serves a Claude Design frontend that
 fetches that data as JSON and renders it entirely client-side (no build step).
+The entire application is containerized with Docker and ready for deployment.
 
 ## Architecture
 
@@ -29,6 +30,14 @@ industry table show the **province** that the selected region belongs to
 
 ## Setup
 
+### Option 1: Docker (Recommended)
+```bash
+docker build -t okanagan-app .
+docker run -p 8080:8080 okanagan-app
+```
+Then navigate to `http://localhost:8080`.
+
+### Option 2: Local Python Environment
 ```bash
 pip install -r requirements.txt
 python pipeline.py     # downloads 3 StatCan tables → okanagan_economics.db
