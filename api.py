@@ -40,6 +40,11 @@ def style_css():
     return send_from_directory(FRONTEND_DIR, "style.css", mimetype="text/css")
 
 
+@app.route("/about")
+def about():
+    return send_from_directory(FRONTEND_DIR, "about.html")
+
+
 @app.route("/api/labour")
 def api_labour():
     return jsonify(get_payload())

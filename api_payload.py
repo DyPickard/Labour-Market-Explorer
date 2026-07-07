@@ -134,8 +134,32 @@ def build_payload(db_name=DB_NAME):
         # Region-level full-time / total employment for the donut (real FT/PT).
         emp_series = pivot.get("Employment")
         ft_series = pivot.get("Full-time employment")
+        pt_series = pivot.get("Part-time employment")
         tot_jobs = float(emp_series.ffill().bfill().iloc[-1]) if emp_series is not None else 0.0
         ft_jobs = float(ft_series.ffill().bfill().iloc[-1]) if ft_series is not None else 0.0
+
+        # Monthly full-time share of employment (%) for the trend mini-chart.
+        ft_share_s = []
+        if ft_series is not None and pt_series is not None:
+            denom = (ft_series.fillna(0) + pt_series.fillna(0)).replace(0, pd.NA)
+            ft_share_s = [round(float(v), 1)
+                          for v in (ft_series / denom * 100).ffill().bfill().tolist()]
+
+        # Latest labour-force composition (thousands) for the snapshot row.
+        def latest(char):
+            s = pivot.get(char)
+            if s is None:
+                return None
+            v = s.ffill().bfill().iloc[-1]
+            return round(float(v)) if pd.notna(v) else None
+
+        comp = [
+            {"label": "Population", "value": latest("Population")},
+            {"label": "Labour force", "value": latest("Labour force")},
+            {"label": "Employed", "value": latest("Employment")},
+            {"label": "Unemployed", "value": latest("Unemployment")},
+            {"label": "Not in LF", "value": latest("Not in labour force")},
+        ]
 
         secs = industry.get(prov, [])
 
@@ -150,6 +174,9 @@ def build_payload(db_name=DB_NAME):
             "secs": secs,
             "ftJobs": round(ft_jobs, 1),
             "totJobs": round(tot_jobs, 1),
+            "unempJobs": latest("Unemployment") or 0,
+            "ftShareS": ft_share_s,
+            "comp": comp,
             "industryProv": prov,
         }
 

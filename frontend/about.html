@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>About · Regional Labour Market Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="page">
+  <div class="wrap-narrow">
+
+    <a class="back-link" href="/">&larr; Back to dashboard</a>
+
+    <div class="header-titles" style="border-bottom:1px solid #E1DDD3;padding-bottom:22px;margin-bottom:26px;">
+      <div class="eyebrow">
+        <span class="eyebrow-dot"></span>
+        Portfolio project
+      </div>
+      <h1 class="title">About this project</h1>
+      <p class="about-lede">
+        A full-stack dashboard that visualises Statistics Canada Labour Force Survey data for
+        Canada's 65 economic regions. A Python pipeline pulls live government data into a database,
+        a Flask API serves it, and a component-based front end renders it as interactive, hand-drawn
+        SVG charts. Every figure comes from real data &mdash; nothing is mocked.
+      </p>
+    </div>
+
+    <div class="stack-chips">
+      <span class="chip-tag">Python</span>
+      <span class="chip-tag">pandas</span>
+      <span class="chip-tag">SQLAlchemy</span>
+      <span class="chip-tag">SQLite</span>
+      <span class="chip-tag">Flask</span>
+      <span class="chip-tag">requests</span>
+      <span class="chip-tag">JavaScript</span>
+      <span class="chip-tag">React</span>
+      <span class="chip-tag">SVG</span>
+      <span class="chip-tag">HTML / CSS</span>
+      <span class="chip-tag">StatCan WDS API</span>
+    </div>
+
+    <!-- Architecture -->
+    <div class="card card--panel about-section">
+      <div class="panel-title">How it fits together</div>
+      <div class="about-flow">
+        <span class="flow-step">StatCan WDS API</span>
+        <span class="flow-arrow">&rarr;</span>
+        <span class="flow-step">pipeline.py (ETL)</span>
+        <span class="flow-arrow">&rarr;</span>
+        <span class="flow-step">SQLite</span>
+        <span class="flow-arrow">&rarr;</span>
+        <span class="flow-step">api_payload.py</span>
+        <span class="flow-arrow">&rarr;</span>
+        <span class="flow-step">Flask · /api/labour</span>
+        <span class="flow-arrow">&rarr;</span>
+        <span class="flow-step">Browser (SVG dashboard)</span>
+      </div>
+    </div>
+
+    <!-- The data -->
+    <div class="card card--panel about-section">
+      <div class="panel-title">The data</div>
+      <ul class="about-list">
+        <li><strong>Source:</strong> Statistics Canada's Labour Force Survey, pulled from the public
+          Web Data Service (WDS) REST API &mdash; so the numbers are the same ones StatCan publishes.</li>
+        <li><strong>Three tables:</strong> labour-force characteristics by economic region, monthly
+          (14-10-0462); employment by industry, annual (14-10-0023); and employee wages by industry,
+          annual (14-10-0064).</li>
+        <li><strong>An honest caveat:</strong> labour-force figures are published per economic region,
+          but industry and wage data are only published per province. Those panels therefore show the
+          selected region's province, and are labelled that way rather than pretending to be regional.</li>
+      </ul>
+    </div>
+
+    <!-- The pipeline -->
+    <div class="card card--panel about-section">
+      <div class="panel-title">The data pipeline</div>
+      <div class="about-prose">
+        <p>
+          <strong>pipeline.py</strong> asks the WDS API for each table's current download link,
+          streams the zipped CSV, and unzips it in memory &mdash; no files touch disk. pandas then
+          filters the rows that matter (economic regions, the latest reference periods, the relevant
+          characteristics), cleans and reshapes them, and <strong>SQLAlchemy</strong> writes the
+          result into a local <strong>SQLite</strong> database.
+        </p>
+        <p>
+          Because it reads straight from the live API, the whole pipeline can be re-run whenever
+          Statistics Canada releases new monthly data to refresh the dashboard.
+        </p>
+      </div>
+    </div>
+
+    <!-- The backend -->
+    <div class="card card--panel about-section">
+      <div class="panel-title">The backend</div>
+      <div class="about-prose">
+        <p>
+          <strong>api.py</strong> is a small <strong>Flask</strong> app. It serves the front-end
+          files and one JSON endpoint, <strong>/api/labour</strong>, which returns every region's
+          data in a single response.
+        </p>
+        <p>
+          <strong>api_payload.py</strong> builds that response by reading the SQLite tables and
+          assembling, for each region, its monthly rate series, industry breakdowns, and labour-force
+          composition. The payload is cached in memory so repeat requests are instant, with a refresh
+          endpoint to rebuild it after the pipeline runs.
+        </p>
+      </div>
+    </div>
+
+    <!-- The frontend -->
+    <div class="card card--panel about-section">
+      <div class="panel-title">The front end</div>
+      <div class="about-prose">
+        <p>
+          The interface began as a self-contained design component (an HTML template rendered by a
+          lightweight React runtime) that shipped with placeholder data. The core of the work was
+          replacing that mock data with the real thing: the component fetches <strong>/api/labour</strong>
+          once on load and renders the entire dashboard client-side from the response.
+        </p>
+        <p>
+          Every chart is drawn by hand as <strong>SVG</strong> &mdash; the KPI sparklines, the
+          dual-axis unemployment/participation trend line with hover tooltips, the horizontal industry
+          and wage bars, and the donut charts. There is no charting library. The styling was pulled out
+          into a single stylesheet of semantic classes, and the layout is a responsive CSS grid.
+        </p>
+      </div>
+    </div>
+
+    <!-- Details -->
+    <div class="card card--panel about-section">
+      <div class="panel-title">Details worth calling out</div>
+      <ul class="about-list">
+        <li><strong>65 regions, 15 years of history:</strong> every economic region has its own monthly
+          series driving the KPIs, trend line, donuts, and ranking.</li>
+        <li><strong>A layout that never jumps:</strong> the region picker is a fixed width and the header
+          truncates gracefully, so choosing a region with a very long name doesn't reflow the page.</li>
+        <li><strong>Plain-language tooltips:</strong> every tile has an info icon that explains what the
+          statistic actually measures.</li>
+        <li><strong>Charts that tell a story:</strong> the two donuts read as a funnel of the workforce
+          &mdash; the labour force splitting into employed and unemployed, and the employed splitting
+          into full-time and part-time.</li>
+        <li><strong>Accuracy over polish:</strong> figures are labelled honestly wherever the data differs
+          from the ideal &mdash; provincial industry data, three-month moving averages, and the latest
+          available reference period.</li>
+      </ul>
+    </div>
+
+    <div class="footer-note">Source: Statistics Canada, Labour Force Survey (tables 14-10-0462, 14-10-0023 &amp; 14-10-0064). Built as a portfolio project.</div>
+
+  </div>
+</div>
+</body>
+</html>
