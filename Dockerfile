@@ -17,6 +17,10 @@ COPY . .
 # Expose port 8080 (the port our app will run on inside the container)
 EXPOSE 8080
 
+# Copy the entrypoint script and make it executable
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # Command to run the app using Gunicorn (production server)
 # Binding to 0.0.0.0 makes the server accessible from outside the container
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "api:app"]
+CMD ["/entrypoint.sh"]

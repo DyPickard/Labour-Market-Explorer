@@ -7,10 +7,9 @@ that object from the SQLite tables staged by pipeline.py.
 """
 import re
 import sqlite3
-
 import pandas as pd
+from config import DB_NAME
 
-DB_NAME = "okanagan_economics.db"
 
 # StatCan NAICS names carry a bracketed code suffix, e.g. "Construction [23]".
 _BRACKET = re.compile(r"\s*\[[^\]]*\]\s*$")

@@ -1,8 +1,7 @@
 import sqlite3
 import pandas as pd
 from sqlalchemy import create_engine
-
-DB_NAME = "okanagan_economics.db"
+from config import DB_NAME
 
 
 def load_data_to_sqlite(dframe, table_name):

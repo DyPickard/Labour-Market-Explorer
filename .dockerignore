@@ -13,5 +13,5 @@ __pycache__/
 .vscode/
 .idea/
 
-# Ignore local environment files (if you ever add any)
+# Ignore local environment files 
 .env

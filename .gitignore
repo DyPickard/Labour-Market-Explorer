@@ -1,5 +1,6 @@
-*.log
 venv
 .vscode
 __pycache__
-
+.claude
+*.db
+*.log

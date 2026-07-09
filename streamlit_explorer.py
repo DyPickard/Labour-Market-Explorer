@@ -5,18 +5,18 @@ frontend. This module is a lightweight secondary tool for browsing the staged
 `labour_by_region` table directly:  streamlit run streamlit_explorer.py
 """
 import sqlite3
-
 import pandas as pd
 import streamlit as st
 import plotly.express as px
+from config import DB_NAME
 
-DATABASE_NAME = "okanagan_economics.db"
+
 TABLE_NAME = "labour_by_region"
 
 st.set_page_config(page_title="Labour Force Data Explorer", layout="wide")
 st.title("Labour Force Data Explorer")
 
-conn = sqlite3.connect(DATABASE_NAME)
+conn = sqlite3.connect(DB_NAME)
 dframe = pd.read_sql_query(f"SELECT * FROM {TABLE_NAME}", conn)
 conn.close()
 

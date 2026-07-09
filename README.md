@@ -8,7 +8,7 @@ The entire application is containerized with Docker and ready for deployment.
 ## Architecture
 
 ```
-pipeline.py ──► okanagan_economics.db (SQLite)
+pipeline.py ──► statcan_data.db (SQLite)
                  ├─ labour_by_region        14-10-0462  (65 economic regions, monthly, 3-mo MA)
                  ├─ employment_by_industry   14-10-0023  (by province, latest year, NAICS)
                  └─ wages_by_industry        14-10-0064  (by province, latest year, NAICS)
@@ -32,19 +32,19 @@ industry table show the **province** that the selected region belongs to
 
 ### Option 1: Docker (Recommended)
 ```bash
-docker build -t okanagan-app .
-docker run -p 8080:8080 okanagan-app
+docker build -t statcan-app .
+docker run -p 8080:8080 statcan-app
 ```
-Then navigate to `http://localhost:8080`.
+The container will automatically run the ETL pipeline on first startup if the SQLite database file or required tables are missing. Then navigate to `http://localhost:8080`.
 
 ### Option 2: Local Python Environment
 ```bash
 pip install -r requirements.txt
-python pipeline.py     # downloads 3 StatCan tables → okanagan_economics.db
+python pipeline.py     # downloads 3 StatCan tables → statcan_data.db
 python api.py          # serves the dashboard at http://127.0.0.1:5000
 ```
 
-The database is git-ignored, so run `python pipeline.py` once after cloning.
+The database is git-ignored, so run `python pipeline.py` once after cloning if you want to pre-build it locally. The default SQLite filename is `statcan_data.db`; you can override it by setting `DB_NAME` before running the pipeline or app.
 
 ## Refreshing data
 
@@ -52,7 +52,10 @@ StatCan updates the LFS monthly. To refresh:
 
 ```bash
 python pipeline.py                                   # re-stage the tables
-curl -X POST http://127.0.0.1:5000/api/refresh       # or just restart api.py
+# Local Flask run
+curl -X POST http://127.0.0.1:5000/api/refresh
+# Docker run
+curl -X POST http://127.0.0.1:8080/api/refresh
 ```
 
 ## Files
@@ -61,6 +64,8 @@ curl -X POST http://127.0.0.1:5000/api/refresh       # or just restart api.py
 |------|---------|
 | `pipeline.py` | ETL: download + clean 3 StatCan tables into SQLite |
 | `database_loader.py` | Generic `load_data_to_sqlite(df, table_name)` |
+| `config.py` | Shared DB name configuration used across the app |
+| `entrypoint.sh` | Docker startup script that bootstraps the DB if needed |
 | `api_payload.py` | Builds the `{defs, map, meta}` JSON from the DB |
 | `api.py` | Flask server (main app) |
 | `frontend/index.html` | Claude Design dashboard, wired to `/api/labour` |
