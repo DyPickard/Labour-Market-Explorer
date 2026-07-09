@@ -44,7 +44,7 @@ python pipeline.py     # downloads 3 StatCan tables → statcan_data.db
 python api.py          # serves the dashboard at http://127.0.0.1:5000
 ```
 
-The database is git-ignored, so run `python pipeline.py` once after cloning if you want to pre-build it locally. The default SQLite filename is `statcan_data.db`; you can override it by setting `DB_NAME` before running the pipeline or app.
+run `python pipeline.py` once after cloning if you want to update the local data. The default SQLite filename is `statcan_data.db`; you can override it by setting `DB_NAME` in config.py before running the pipeline or app.
 
 ## Refreshing data
 
